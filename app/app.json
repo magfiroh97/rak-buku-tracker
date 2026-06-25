@@ -1,0 +1,57 @@
+{
+  "expo": {
+    "name": "Rak Buku Tracker",
+    "slug": "rak-buku-tracker",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "scheme": "rakbukutracker",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rakbukutracker.app"
+    },
+    "android": {
+      "package": "com.rakbukutracker.app",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#2D5A4A",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": [
+        "CAMERA",
+        "NOTIFICATIONS"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Aplikasi membutuhkan akses kamera untuk memindai barcode ISBN buku."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#2D5A4A"
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#2D5A4A"
+        }
+      ]
+    ]
+  }
+}
+
