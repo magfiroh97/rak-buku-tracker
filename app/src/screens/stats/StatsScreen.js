@@ -4,9 +4,8 @@
 // sebagai "dashboard" pembaca, lalu ada tombol ke Riwayat Aktivitas terpisah)
 
 import React, { useCallback, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, Modal, Dimensions } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { BarChart } from 'react-native-chart-kit';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../store/ThemeContext';
 import { statsApi } from '../../api/stats';
@@ -15,7 +14,6 @@ import FormInput from '../../components/FormInput';
 import PrimaryButton from '../../components/PrimaryButton';
 import { spacing, fontSize, radius } from '../../constants/theme';
 
-const { width } = Dimensions.get('window');
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
 
 export default function StatsScreen({ navigation }) {
@@ -112,23 +110,8 @@ export default function StatsScreen({ navigation }) {
       </View>
 
       <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <Text style={[styles.cardTitle, { color: colors.text, marginBottom: spacing.sm }]}>Buku Selesai per Bulan</Text>
-        <BarChart
-          data={{ labels: MONTH_LABELS, datasets: [{ data: monthlyData }] }}
-          width={width - spacing.lg * 2 - spacing.md * 2}
-          height={200}
-          fromZero
-          chartConfig={{
-            backgroundColor: colors.surface,
-            backgroundGradientFrom: colors.surface,
-            backgroundGradientTo: colors.surface,
-            decimalPlaces: 0,
-            color: () => colors.primary,
-            labelColor: () => colors.textSecondary,
-            barPercentage: 0.6,
-          }}
-          style={{ borderRadius: radius.md }}
-        />
+        <Text style={[styles.cardTitle, { color: colors.text, marginBottom: spacing.md }]}>Buku Selesai per Bulan</Text>
+        <SimpleBarChart data={monthlyData} labels={MONTH_LABELS} color={colors.primary} textColor={colors.textSecondary} bgColor={colors.border} />
       </View>
 
       <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -184,6 +167,43 @@ function StatBox({ label, value, colors }) {
     <View style={[styles.statBox, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <Text style={[styles.statValue, { color: colors.primary }]}>{value}</Text>
       <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{label}</Text>
+    </View>
+  );
+}
+
+// Bar chart buatan sendiri -- lebih ringan dan dijamin render benar
+// di semua environment (Expo Go, dev build, maupun production build),
+// berbeda dari react-native-chart-kit yang bergantung pada SVG native.
+function SimpleBarChart({ data, labels, color, textColor, bgColor }) {
+  const maxVal = Math.max(...data, 1);
+  const BAR_HEIGHT = 120;
+
+  return (
+    <View>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', height: BAR_HEIGHT, marginBottom: 4 }}>
+        {data.map((val, i) => (
+          <View key={i} style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-end' }}>
+            {val > 0 && (
+              <Text style={{ fontSize: 9, color: textColor, marginBottom: 2 }}>{val}</Text>
+            )}
+            <View
+              style={{
+                width: '60%',
+                height: Math.max((val / maxVal) * (BAR_HEIGHT - 20), val > 0 ? 4 : 0),
+                backgroundColor: val > 0 ? color : bgColor,
+                borderRadius: 3,
+              }}
+            />
+          </View>
+        ))}
+      </View>
+      <View style={{ flexDirection: 'row' }}>
+        {labels.map((label, i) => (
+          <Text key={i} style={{ flex: 1, fontSize: 8, color: textColor, textAlign: 'center' }}>
+            {label}
+          </Text>
+        ))}
+      </View>
     </View>
   );
 }

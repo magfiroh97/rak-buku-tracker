@@ -10,6 +10,7 @@ const reviewRoutes = require('./routes/reviewRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const statsRoutes = require('./routes/statsRoutes');
 const googleBooksRoutes = require('./routes/googleBooksRoutes');
+const gutenbergRoutes = require('./routes/gutenbergRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,28 +19,24 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Inisialisasi skema database saat server start
 initSchema();
 
-// Health check
 app.get('/', (req, res) => {
   res.json({ success: true, message: 'Rak Buku Tracker API berjalan dengan baik 📚' });
 });
 
-// Mount semua routes
 app.use('/api/auth', authRoutes);
 app.use('/api/books', bookRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/google-books', googleBooksRoutes);
+app.use('/api/gutenberg', gutenbergRoutes);
 
-// 404 handler
 app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Endpoint tidak ditemukan.' });
 });
 
-// Global error handler
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ success: false, message: 'Terjadi kesalahan internal server.' });

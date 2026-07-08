@@ -1,6 +1,6 @@
 // src/screens/books/BookDetailScreen.js
-// Fitur 10: Detail Buku — pusat aksi ke Edit (11), Hapus (12),
-// Update Progress (14), dan Tulis Review (16).
+// Fitur 10: Detail Buku — hub ke Edit (11), Hapus (12), Progress (14),
+// Review (16), Baca Buku (Gutenberg/WebView), dan Baca PDF Lokal.
 
 import React, { useCallback, useState } from 'react';
 import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../store/ThemeContext';
 import { booksApi } from '../../api/books';
+import { gutenbergApi } from '../../api/gutenberg';
 import { useBookStore } from '../../store/useBookStore';
 import { getErrorMessage } from '../../api/client';
 import StarRating from '../../components/StarRating';
@@ -18,6 +19,7 @@ export default function BookDetailScreen({ navigation, route }) {
   const { colors } = useTheme();
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [checkingReader, setCheckingReader] = useState(false);
 
   const loadDetail = useCallback(async () => {
     try {
@@ -30,16 +32,12 @@ export default function BookDetailScreen({ navigation, route }) {
     }
   }, [bookId]);
 
-  useFocusEffect(
-    useCallback(() => {
-      loadDetail();
-    }, [loadDetail])
-  );
+  useFocusEffect(useCallback(() => { loadDetail(); }, [loadDetail]));
 
   const handleDelete = () => {
     Alert.alert(
       'Hapus Buku',
-      `Yakin ingin menghapus "${book?.title}" dari rak? Tindakan ini tidak bisa dibatalkan.`,
+      `Yakin ingin menghapus "${book?.title}"? Tindakan ini tidak bisa dibatalkan.`,
       [
         { text: 'Batal', style: 'cancel' },
         {
@@ -76,6 +74,25 @@ export default function BookDetailScreen({ navigation, route }) {
     }
   };
 
+  // Cek dulu ke Gutenberg, kalau ada pakai reader sendiri,
+  // kalau tidak ada fallback ke WebView Google Books
+  const handleOpenReader = async () => {
+    setCheckingReader(true);
+    try {
+      const res = await gutenbergApi.checkAvailability(book.title, book.author);
+      const result = res.data.data;
+      if (result.available && result.text_url) {
+        navigation.navigate('GutenbergReader', { book, textUrl: result.text_url });
+      } else {
+        navigation.navigate('ReadBook', { book });
+      }
+    } catch (err) {
+      navigation.navigate('ReadBook', { book });
+    } finally {
+      setCheckingReader(false);
+    }
+  };
+
   if (loading || !book) {
     return (
       <View style={[styles.center, { backgroundColor: colors.background }]}>
@@ -93,20 +110,23 @@ export default function BookDetailScreen({ navigation, route }) {
           <Ionicons name="chevron-back" size={26} color={colors.text} />
         </TouchableOpacity>
 
+        {/* Header: cover + judul + status */}
         <View style={styles.headerSection}>
           <Image
             source={{ uri: book.cover_url || 'https://via.placeholder.com/140x210.png?text=No+Cover' }}
             style={styles.cover}
           />
           <Text style={[styles.title, { color: colors.text }]}>{book.title}</Text>
-          <Text style={[styles.author, { color: colors.textSecondary }]}>{book.author || 'Penulis tidak diketahui'}</Text>
-
+          <Text style={[styles.author, { color: colors.textSecondary }]}>
+            {book.author || 'Penulis tidak diketahui'}
+          </Text>
           <View style={[styles.statusBadge, { backgroundColor: statusColors[book.status] + '22' }]}>
             <Text style={{ color: statusColors[book.status], fontWeight: '700', fontSize: fontSize.xs }}>
               {statusLabels[book.status]}
             </Text>
           </View>
 
+          {/* Tombol aksi baris */}
           <View style={styles.actionRow}>
             <TouchableOpacity style={styles.iconAction} onPress={handleToggleFavorite}>
               <Ionicons name={book.is_favorite ? 'heart' : 'heart-outline'} size={24} color={book.is_favorite ? colors.danger : colors.text} />
@@ -127,21 +147,45 @@ export default function BookDetailScreen({ navigation, route }) {
           </View>
         </View>
 
+        {/* Tombol Baca Buku (domain publik via Google Books/Gutenberg) */}
         {!!book.is_public_domain && !!book.read_link && (
           <TouchableOpacity
             style={[styles.readBookCard, { backgroundColor: colors.primary }]}
-            onPress={() => navigation.navigate('ReadBook', { book })}
+            onPress={handleOpenReader}
+            disabled={checkingReader}
             activeOpacity={0.85}
           >
-            <Ionicons name="book-outline" size={22} color="#FFFFFF" />
+            {checkingReader
+              ? <ActivityIndicator color="#FFFFFF" />
+              : <Ionicons name="book-outline" size={22} color="#FFFFFF" />
+            }
             <View style={{ marginLeft: spacing.sm, flex: 1 }}>
               <Text style={styles.readBookTitle}>Baca Buku Ini</Text>
-              <Text style={styles.readBookSubtitle}>Tersedia gratis — buku domain publik via Google Books</Text>
+              <Text style={styles.readBookSubtitle}>
+                {checkingReader ? 'Menyiapkan...' : 'Buku domain publik — tersedia gratis'}
+              </Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
+            {!checkingReader && <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />}
           </TouchableOpacity>
         )}
 
+        {/* Tombol Baca PDF Lokal */}
+        <TouchableOpacity
+          style={[styles.pdfCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          onPress={() => navigation.navigate('PDFReader', { book })}
+          activeOpacity={0.85}
+        >
+          <Ionicons name="document-text-outline" size={22} color={colors.accent} />
+          <View style={{ marginLeft: spacing.sm, flex: 1 }}>
+            <Text style={[styles.readBookTitle, { color: colors.text }]}>Baca File Lokal</Text>
+            <Text style={[styles.readBookSubtitle, { color: colors.textSecondary }]}>
+              Upload & baca PDF dari storage HP kamu
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+        </TouchableOpacity>
+
+        {/* Card progres membaca */}
         {book.total_pages > 0 && (
           <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.cardHeaderRow}>
@@ -164,16 +208,15 @@ export default function BookDetailScreen({ navigation, route }) {
           </View>
         )}
 
+        {/* Card rating & review */}
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <View style={styles.cardHeaderRow}>
             <Text style={[styles.cardTitle, { color: colors.text }]}>Rating & Review Saya</Text>
           </View>
           <StarRating rating={book.review?.rating || 0} readOnly size={22} />
-          {book.review?.note ? (
-            <Text style={[styles.reviewNote, { color: colors.text }]}>{book.review.note}</Text>
-          ) : (
-            <Text style={[styles.reviewNote, { color: colors.textSecondary }]}>Belum ada catatan review.</Text>
-          )}
+          <Text style={[styles.reviewNote, { color: book.review?.note ? colors.text : colors.textSecondary }]}>
+            {book.review?.note || 'Belum ada catatan review.'}
+          </Text>
           <TouchableOpacity
             style={[styles.updateBtn, { borderColor: colors.primary, marginTop: spacing.sm }]}
             onPress={() => navigation.navigate('WriteReview', { book })}
@@ -205,19 +248,26 @@ const styles = StyleSheet.create({
   actionRow: { flexDirection: 'row', marginTop: spacing.lg, gap: spacing.lg },
   iconAction: { alignItems: 'center' },
   iconActionLabel: { fontSize: 11, marginTop: 2 },
-  card: { borderRadius: radius.md, borderWidth: 1, padding: spacing.md, marginBottom: spacing.md },
   readBookCard: {
     flexDirection: 'row', alignItems: 'center', borderRadius: radius.md,
-    padding: spacing.md, marginBottom: spacing.md,
+    padding: spacing.md, marginBottom: spacing.sm,
+  },
+  pdfCard: {
+    flexDirection: 'row', alignItems: 'center', borderRadius: radius.md,
+    borderWidth: 1, padding: spacing.md, marginBottom: spacing.md,
   },
   readBookTitle: { color: '#FFFFFF', fontWeight: '700', fontSize: fontSize.sm },
   readBookSubtitle: { color: '#FFFFFF', opacity: 0.85, fontSize: 11, marginTop: 2 },
+  card: { borderRadius: radius.md, borderWidth: 1, padding: spacing.md, marginBottom: spacing.md },
   cardHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm },
   cardTitle: { fontSize: fontSize.md, fontWeight: '700' },
   progressTrack: { height: 8, borderRadius: radius.full, overflow: 'hidden' },
   progressFill: { height: '100%' },
   pageText: { fontSize: fontSize.xs, marginTop: spacing.xs },
-  updateBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderRadius: radius.md, paddingVertical: 10, marginTop: spacing.md },
+  updateBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1.5, borderRadius: radius.md, paddingVertical: 10, marginTop: spacing.md,
+  },
   reviewNote: { fontSize: fontSize.sm, marginTop: spacing.sm, lineHeight: 20 },
   isbnText: { fontSize: fontSize.xs, textAlign: 'center', marginTop: spacing.sm },
 });

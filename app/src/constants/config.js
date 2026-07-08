@@ -15,7 +15,7 @@
 //    keperluan submit ke Play Store, ganti BASE_URL ke URL production tersebut.
 //    Aplikasi yang sudah di-build TIDAK bisa akses "localhost" laptop kamu.
 
-const DEV_LOCAL_IP = 'http://192.168.1.2:3000'; // <-- GANTI dengan IP lokal laptop kamu
+const DEV_LOCAL_IP = 'http://192.168.1.10:3000'; // <-- GANTI dengan IP lokal laptop kamu
 const PRODUCTION_URL = 'https://api-rakbuku-kamu.com'; // <-- GANTI saat deploy backend ke server
 
 const isDev = __DEV__;

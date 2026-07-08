@@ -1,8 +1,4 @@
 // src/navigation/BooksStackNavigator.js
-// Stack di balik tab "Rak Buku". Menghubungkan Fitur 7-16, 20-21 jadi satu
-// alur yang mengalir: Home -> Detail -> Edit/Progress/Review, dan
-// Home -> AddBook -> SearchBook -> BarcodeScanner -> (balik ke AddBook terisi).
-
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/books/HomeScreen';
@@ -13,6 +9,8 @@ import BookDetailScreen from '../screens/books/BookDetailScreen';
 import EditBookScreen from '../screens/books/EditBookScreen';
 import UpdateProgressScreen from '../screens/books/UpdateProgressScreen';
 import ReadBookScreen from '../screens/books/ReadBookScreen';
+import GutenbergReaderScreen from '../screens/books/GutenbergReaderScreen';
+import PDFReaderScreen from '../screens/books/PDFReaderScreen';
 import WriteReviewScreen from '../screens/reviews/WriteReviewScreen';
 
 const Stack = createNativeStackNavigator();
@@ -32,6 +30,8 @@ export default function BooksStackNavigator() {
       <Stack.Screen name="EditBook" component={EditBookScreen} />
       <Stack.Screen name="UpdateProgress" component={UpdateProgressScreen} />
       <Stack.Screen name="ReadBook" component={ReadBookScreen} />
+      <Stack.Screen name="GutenbergReader" component={GutenbergReaderScreen} />
+      <Stack.Screen name="PDFReader" component={PDFReaderScreen} />
       <Stack.Screen name="WriteReview" component={WriteReviewScreen} />
     </Stack.Navigator>
   );

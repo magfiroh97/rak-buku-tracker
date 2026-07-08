@@ -4,7 +4,7 @@
 // dan Scan, sehingga semua fitur buku saling terhubung lewat screen ini.
 
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ScrollView, TouchableOpacity, RefreshControl, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../store/ThemeContext';
@@ -61,19 +61,19 @@ export default function HomeScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      <FlatList
+      <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        data={FILTERS}
-        keyExtractor={(item) => String(item.key)}
         contentContainerStyle={styles.filterRow}
-        renderItem={({ item }) => (
+      >
+        {FILTERS.map((item) => (
           <TouchableOpacity
+            key={String(item.key)}
             style={[
               styles.filterChip,
               {
                 backgroundColor: activeFilter === item.key ? colors.primary : colors.surface,
-                borderColor: colors.border,
+                borderColor: activeFilter === item.key ? colors.primary : colors.border,
               },
             ]}
             onPress={() => setActiveFilter(item.key)}
@@ -82,8 +82,8 @@ export default function HomeScreen({ navigation }) {
               {item.label}
             </Text>
           </TouchableOpacity>
-        )}
-      />
+        ))}
+      </ScrollView>
 
       <FlatList
         data={books}
@@ -127,10 +127,11 @@ const styles = StyleSheet.create({
   greeting: { fontSize: fontSize.sm },
   userName: { fontSize: fontSize.xl, fontWeight: '800' },
   searchBtn: { padding: spacing.sm },
-  filterRow: { paddingHorizontal: spacing.lg, paddingVertical: spacing.sm, gap: spacing.sm },
+  filterRow: { paddingHorizontal: spacing.lg, paddingVertical: spacing.sm, flexDirection: 'row', alignItems: 'center' },
   filterChip: {
-    paddingHorizontal: spacing.md, paddingVertical: 8, borderRadius: radius.full,
-    borderWidth: 1, marginRight: spacing.sm,
+    paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20,
+    borderWidth: 1.5, marginRight: spacing.sm,
+    alignSelf: 'flex-start',
   },
   listContent: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xl * 2 },
   fab: {

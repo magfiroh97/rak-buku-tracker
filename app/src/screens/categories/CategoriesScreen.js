@@ -74,7 +74,7 @@ export default function CategoriesScreen({ navigation }) {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.border }]}
-            onPress={() => navigation.navigate('Home', { categoryFilter: item.id })}
+            onPress={() => navigation.navigate('BooksTab', { screen: 'Home', params: { categoryFilter: item.id } })}
           >
             <View style={styles.rowLeft}>
               <Ionicons name="pricetag-outline" size={18} color={colors.primary} />

@@ -2,6 +2,11 @@
   "name": "app",
   "version": "1.0.0",
   "main": "index.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
+  },
   "dependencies": {
     "@expo/vector-icons": "^15.1.1",
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -15,6 +20,8 @@
     "expo": "~56.0.12",
     "expo-camera": "^56.0.8",
     "expo-constants": "~18.0.9",
+    "expo-document-picker": "^13.0.3",
+    "expo-file-system": "^18.0.11",
     "expo-image-picker": "^56.0.18",
     "expo-notifications": "^56.0.18",
     "expo-secure-store": "^56.0.4",
@@ -22,20 +29,13 @@
     "expo-status-bar": "~56.0.4",
     "react": "19.2.3",
     "react-native": "0.85.3",
-    "react-native-chart-kit": "^6.12.3",
     "react-native-gesture-handler": "^3.0.2",
+    "react-native-pdf": "^6.7.6",
     "react-native-safe-area-context": "^5.8.0",
     "react-native-screens": "^4.25.2",
     "react-native-svg": "^15.15.5",
     "react-native-vector-icons": "^10.3.0",
     "react-native-webview": "13.16.0",
     "zustand": "^5.0.14"
-  },
-  "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
-  },
-  "private": true
+  }
 }
