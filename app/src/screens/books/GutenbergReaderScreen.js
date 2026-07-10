@@ -7,6 +7,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../store/ThemeContext';
 import { gutenbergApi } from '../../api/gutenberg';
 import { spacing, radius } from '../../constants/theme';
@@ -22,6 +23,7 @@ const READING_THEMES = {
 export default function GutenbergReaderScreen({ route }) {
   const { book, textUrl } = route.params;
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   const { colors } = useTheme();
 
   const [text, setText] = useState('');
@@ -77,7 +79,7 @@ export default function GutenbergReaderScreen({ route }) {
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Toolbar kontrol baca — muncul/sembunyi saat tap layar */}
       {showControls && (
-        <View style={[styles.toolbar, { backgroundColor: theme.background, borderBottomColor: theme.text + '22' }]}>
+        <View style={[styles.toolbar, { backgroundColor: theme.background, borderBottomColor: theme.text + '22', paddingTop: insets.top + 10 }]}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconBtn}>
             <Ionicons name="chevron-back" size={24} color={theme.text} />
           </TouchableOpacity>
