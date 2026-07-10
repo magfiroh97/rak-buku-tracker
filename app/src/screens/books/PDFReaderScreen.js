@@ -11,8 +11,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../store/ThemeContext';
 import ScreenHeader from '../../components/ScreenHeader';
 import { spacing, fontSize, radius } from '../../constants/theme';
@@ -39,6 +40,7 @@ async function ensurePdfDir() {
 export default function PDFReaderScreen({ route }) {
   const { book } = route.params;
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const [pdfUri, setPdfUri] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -123,7 +125,7 @@ export default function PDFReaderScreen({ route }) {
   if (pdfUri && pdfAvailable && Pdf) {
     return (
       <View style={{ flex: 1, backgroundColor: '#1a1a1a' }}>
-        <View style={[styles.pdfToolbar, { backgroundColor: '#2a2a2a' }]}>
+        <View style={[styles.pdfToolbar, { backgroundColor: '#2a2a2a', paddingTop: insets.top + 10 }]}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconBtn}>
             <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
           </TouchableOpacity>
