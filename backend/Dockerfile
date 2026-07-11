@@ -1,5 +1,3 @@
-# Dockerfile untuk backend Rak Buku Tracker
-# Taruh file ini di dalam folder backend/ (sejajar dengan package.json)
 
 FROM node:20-bullseye-slim
 
